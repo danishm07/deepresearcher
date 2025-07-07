@@ -1,0 +1,5 @@
+
+name: "ArXiv Analyzer"
+steps:
+  - search_arxiv
+  - summarize_and_extract

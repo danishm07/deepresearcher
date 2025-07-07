@@ -1,0 +1,5 @@
+
+name: Single Paper Chat
+description: Allows users to have conversations with a single research paper.
+steps:
+  - chat_single_paper
