@@ -6,7 +6,8 @@ from backend.database.memory import store_paper
 from backend.mcp.plugin_registry import register_plugin
 from backend.search.arxiv_search import search_arxiv
 from backend.agents.chat_single_paper import chat_single_paper_plugin
-
+from backend.agents.chat_entire_paper import chat_entire_paper_plugin
+from backend.tools.pdf_parser import download_pdf_from_arxiv, extract_text_from_pdf
 
 STORAGE_PATH = "frontend/storage.json"
 
@@ -23,6 +24,26 @@ def search_arxiv_plugin(input_data):
     query = input_data.get("query", "")
     results = search_arxiv(query)
     print(f"[search_arxiv_plugin] Query: {query} → {len(results)} results")
+
+    for paper in results:
+        try:
+            # Derive ArXiv ID (needed for PDF URL)
+            paper_id = paper.get("id", "").split("/")[-1]
+
+            # Download PDF
+            pdf_path = download_pdf_from_arxiv(paper_id)
+
+            # Extract text
+            full_text = extract_text_from_pdf(pdf_path)
+
+            # Save both
+            paper["pdf_path"] = pdf_path
+            paper["full_text"] = full_text
+        except Exception as e:
+            print(f"❌ Failed to get PDF for {paper['title'][:50]}: {e}")
+            paper["pdf_path"] = None
+            paper["full_text"] = ""
+
     return results
 
 @register_plugin("summarize_and_extract")
@@ -42,11 +63,14 @@ def summarize_and_extract(input_data):
         dataset_cards = build_dataset_card(mentions, github_links)
 
         store_paper(paper.get("id", "unknown"), {
+            "id": paper.get("id", "unknown"),
             "title": paper.get("title", ""),
             "summary": summary,
             "source": paper.get("source", "unknown"),
             "source_url": paper.get("url", None),
-            "authors": paper.get("authors", [])
+            "authors": paper.get("authors", []),
+            "pdf_path": paper.get("pdf_path", ""),
+            "full_text": paper.get("full_text", ""),
         })
 
         results.append({
@@ -55,7 +79,8 @@ def summarize_and_extract(input_data):
             "summary": summary,
             "datasets": dataset_cards,
             "source_url": paper.get("url", None),
-            "authors": paper.get("authors", [])
+            "authors": paper.get("authors", []),
+            "full_text": paper.get("full_text", ""),
         })
     print(f"[summarize_and_extract] Returning {len(results)} summarized papers")
     return {"papers": results} 

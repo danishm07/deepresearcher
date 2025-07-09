@@ -58,7 +58,8 @@ for paper in saved:
                 st.markdown("❌ No datasets found.")
 
         # Tags input
-        unique_tag_key = f"tags_{paper['id']}_{i}"
+        
+        unique_tag_key = f"tags_{paper.get('id', i)}_{i}"
         new_tags = st.text_input(
             f"Add tags (comma separated) for {paper['title']}",
             ", ".join(tags),
@@ -68,7 +69,7 @@ for paper in saved:
         
 
         # Delete button
-        if st.button(f"🗑️ Delete", key=f"delete_{paper['id']}"):
+        if st.button(f"🗑️ Delete", key=f"delete_{paper.get('id', i)}"):
             continue  # Skip saving this paper (i.e., delete it)
 
         updated_saved.append(paper)

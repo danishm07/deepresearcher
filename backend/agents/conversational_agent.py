@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from tools.semantic_context_retriever import find_relevant_passages
 
 load_dotenv()
-HF_API_KEY = os.getenv("HUGGINGFACE_API_TOKEN")
+HF_API_KEY = os.getenv("HF_TOKEN")
 HF_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"  
 
 def ask_question(question):

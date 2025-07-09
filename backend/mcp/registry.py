@@ -17,8 +17,11 @@ from backend.mcp import agents
 import backend.mcp.agents 
 
 
-def load_yaml_workflow(file_path):
-    with open(file_path, "r") as f:
+def load_yaml_workflow_by_agent_name(agent_name):
+    yaml_path = f"backend/workflows/{agent_name}.yaml"
+    if not os.path.exists(yaml_path):
+        raise FileNotFoundError(f"No workflow YAML found for agent: {agent_name}")
+    with open(yaml_path, "r") as f:
         return yaml.safe_load(f)
 
 def execute_workflow(agent_yaml, inputs):

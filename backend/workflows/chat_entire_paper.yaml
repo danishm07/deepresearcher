@@ -1,0 +1,4 @@
+name: Full Paper Chat
+description: Allows chat with the entire paper
+steps:
+  - chat_entire_paper

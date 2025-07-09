@@ -6,7 +6,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
-from backend.mcp.registry import load_yaml_workflow, execute_workflow
+from backend.mcp.registry import load_yaml_workflow_by_agent_name, execute_workflow
 import backend.mcp.agents 
 
 app = FastAPI()
@@ -20,13 +20,10 @@ STORAGE_PATH = "frontend/storage.json"
 
 @app.post("/run-agent")
 def run_agent(request: AgentRequest):
-    yaml_path = os.path.join(os.path.dirname(__file__), "..", "workflows", f"{request.agent_name}.yaml")
-    yaml_path = os.path.abspath(yaml_path)
-
-    if not os.path.exists(yaml_path):
+    try:
+        agent_yaml = load_yaml_workflow_by_agent_name(request.agent_name)
+    except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Agent YAML not found.")
-
-    agent_yaml = load_yaml_workflow(yaml_path)
     print("🧠 Loaded YAML:", agent_yaml)
 
     # For chat_single_paper, context is required
